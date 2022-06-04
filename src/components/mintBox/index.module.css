@@ -1,0 +1,12 @@
+@import "../variables.css";
+
+.homeWrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  height: 100vh;
+  background-position: center;
+}
