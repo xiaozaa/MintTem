@@ -32,6 +32,7 @@ export const MintBox = ({ data }) => {
         </div>)
         :
         (<div className={styles.boxWrapperTop}>
+          <p>{data.state.mintType}</p>
           <div className={styles.boxWrapperTopContent}>
             <Box sx={{ minWidth: 90 }}>
               <FormControl fullWidth>

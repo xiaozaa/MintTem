@@ -36,27 +36,21 @@ export const getMintStatus = async (data) => {
     if (!data.state.web3) {
         throw new Error("Error: Please connect correct wallet.");
     } else {
-        const web3 = data.state.web3;
-        const chainId = Number(data.state.chainId);
-        const targetContract = CONTRACTADDRESS[chainId];
-        var contract = new web3.eth.Contract(abi, targetContract);
 
-        var isPublic = false;
-        try {
-            isPublic = await contract.methods.isPublicSaleOn().call((err, result) => {
-                if (err) {
-                    return false;
-                }
-                return result;
-            });
-        } catch (err) {
-            isPublic = false;
-        }
+        const isPublic = await getIsPublicSaleOn(data);
+        const isAllowlist = await getIsAllowlistSaleOn(data);
+        let type = "";
         if (isPublic) {
-            return "public";
-        } else {
-            return "";
+            type = "public"
         }
+        else if (isAllowlist) {
+            type = "allowlist"
+        }
+        data.setState({
+            mintType: type,
+        });
+        console.log("getMintStatus", type);
+        return type;
     }
 };
 
@@ -77,4 +71,61 @@ export const getMinted = async (data) => {
             });
         });
     }
+};
+
+export const getIsPublicSaleOn = async (data) => {
+    return new Promise(async (resolve, reject) => {
+        if (!data.state.web3) {
+            reject(new Error("Error: Please connect correct wallet."));
+        } else {
+            const web3 = data.state.web3;
+            const chainId = data.state.chainId;
+            const targetContract = CONTRACTADDRESS[chainId];
+            var contract = new web3.eth.Contract(abi, targetContract);
+            var res = false;
+            try {
+                res = await contract.methods
+                    .isPublicSaleOn()
+                    .call((err, result) => {
+                        if (err) {
+                            return false;
+                        }
+                        return result;
+                    });
+            } catch (err) {
+                res = false;
+            }
+
+            console.log("getIsPublicSaleOn", res);
+            resolve(res);
+        }
+    });
+};
+
+export const getIsAllowlistSaleOn = async (data) => {
+    return new Promise(async (resolve, reject) => {
+        if (!data.state.web3) {
+            reject(new Error("Error: Please connect correct wallet."));
+        } else {
+            const web3 = data.state.web3;
+            const chainId = data.state.chainId;
+            const targetContract = CONTRACTADDRESS[chainId];
+            var contract = new web3.eth.Contract(abi, targetContract);
+            var res = false;
+            try {
+                res = await contract.methods
+                    .isAllowlistSaleOn()
+                    .call((err, result) => {
+                        if (err) {
+                            return false;
+                        }
+                        return result;
+                    });
+            } catch (err) {
+                res = false;
+            }
+            console.log("getIsAllowlistSaleOn", res);
+            resolve(res);
+        }
+    });
 };

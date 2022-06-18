@@ -4,11 +4,12 @@ import {
 } from "./const";
 import {
   CONTRACTADDRESS,
-  PRICE,
+  ALLOWLIST_PRICE_WEI,
+  PUBLIC_PRICE_WEI,
 } from "./configuration";
 import { getMintStatus } from "./status";
 
-import { transactionHostURL } from "./util";
+import { transactionHostURL, getProof } from "./util";
 
 const formatMintTransaction = async (data) => {
   const web3 = data.state.web3;
@@ -18,30 +19,38 @@ const formatMintTransaction = async (data) => {
   const targetContract = CONTRACTADDRESS[chainId];
   var contract = new web3.eth.Contract(abi, targetContract);
 
-  let extraData;
+  var extraData;
+  var finalPrice = "0";
   var mintType = await getMintStatus(data);
   if (!mintType) {
     mintType = data.state.mintType;
   }
+
   if (mintType === "public") {
-    extraData = await contract.methods.mint(count);
+    extraData = await contract.methods.publicSale(count);
+    finalPrice = PUBLIC_PRICE_WEI * count;
+  }
+  else if (mintType === "allowlist") {
+    const proof = await getProof(data);
+    extraData = await contract.methods.allowlistSale(count, proof);
+    finalPrice = ALLOWLIST_PRICE_WEI * count;
   } else {
     throw new Error("Sales is not start yet.");
   }
-  let input = extraData.encodeABI();
-  const finalPrice = count * PRICE;
+  var input = extraData.encodeABI();
+  console.log("finalPrice", finalPrice, typeof finalPrice);
   const estimatedGas = await web3.eth.estimateGas({
     from: address,
     data: input,
     to: targetContract,
-    value: web3.utils.toWei(finalPrice.toString(), "ether"),
+    value: web3.utils.toWei(finalPrice.toString(), "wei"),
   });
   const nonce = await web3.eth.getTransactionCount(address, "latest");
   return {
     gas: parseInt(estimatedGas * GAS_INCREASE),
     to: targetContract,
     from: address,
-    value: web3.utils.toWei(finalPrice.toString(), "ether"),
+    value: web3.utils.toWei(finalPrice.toString(), "wei"),
     data: web3.utils.toHex(input),
     nonce,
   };
