@@ -16,6 +16,8 @@ deploy the example contract
 
 Copy the contract address
 
+npx hardhat verify --constructor-args argument.js  
+
 ## Website configuration
 
 In the project directory ./src/utils/configuration.js, you need to change assign the correct contract address based on chain id:
