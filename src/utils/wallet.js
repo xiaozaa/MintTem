@@ -42,13 +42,13 @@ export const onConnect = async (data) => {
     containedModalShow: "",
     mintErrorMsg: "",
   });
-  var mintType = await getMintStatus(data);
-  if (mintType) {
-    data.setState({
-      mintType: mintType,
-    });
-  }
-  getMintedRecur(data);
+  // var mintType = await getMintStatus(data);
+  // if (mintType) {
+  //   data.setState({
+  //     mintType: mintType,
+  //   });
+  // }
+  // getMintedRecur(data);
 };
 
 const subscribeProvider = async (provider, data) => {

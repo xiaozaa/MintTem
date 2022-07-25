@@ -51,7 +51,8 @@ export const Home = ({ data }) => {
   return (
     <div className={styles.homeWrapper}>
       <ConnectButton data={data} />
-      <MintBox data={data} />
+      <MintBox data={data} type={"1155"} />
+      <MintBox data={data} type={"721"} />
       {data.state.containedModalShow && (
         <ModalDialog
           title={data.state.modalDialogTitle}

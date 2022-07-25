@@ -10,7 +10,7 @@ import FormControl from '@mui/material/FormControl';
 import Box from '@mui/material/Box';
 
 
-export const MintBox = ({ data }) => {
+export const MintBox = ({ data, type }) => {
   const [amount, setAmount] = React.useState('');
   const handleChange = (event: SelectChangeEvent) => {
     setAmount(event.target.value);
@@ -51,14 +51,14 @@ export const MintBox = ({ data }) => {
             </Box>
             <Button variant="contained" disabled={!data.state.connected} onClick={() => {
               console.log("MINT DATA", data);
-              MintTransaction(data);
+              MintTransaction(data, type);
               data.setState({
                 containedModalShow: true,
                 modalDialogBodyText: `Claiming ${data.state.count}`
               })
-            }}> Mint</Button>
+            }}> Mint {type}</Button>
           </div>
-          <p>{data.state.mintedNum}/{MAX_AMOUNT} Minted</p>
+          {/* <p>{data.state.mintedNum}/{MAX_AMOUNT} Minted</p> */}
         </div>)}
     </div>
   );

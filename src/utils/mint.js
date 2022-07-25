@@ -4,14 +4,13 @@ import {
 } from "./const";
 import {
   CONTRACTADDRESS,
-  ALLOWLIST_PRICE_WEI,
-  PUBLIC_PRICE_WEI,
+  TOKEN_ID
 } from "./configuration";
 import { getMintStatus } from "./status";
 
-import { transactionHostURL, getProof } from "./util";
+import { transactionHostURL } from "./util";
 
-const formatMintTransaction = async (data) => {
+const formatMintTransaction = async (data, type) => {
   const web3 = data.state.web3;
   const address = data.state.address;
   const chainId = data.state.chainId;
@@ -20,43 +19,36 @@ const formatMintTransaction = async (data) => {
   var contract = new web3.eth.Contract(abi, targetContract);
 
   var extraData;
-  var finalPrice = "0";
   var mintType = await getMintStatus(data);
   if (!mintType) {
     mintType = data.state.mintType;
   }
-
-  if (mintType === "public") {
-    extraData = await contract.methods.publicSale(count);
-    finalPrice = PUBLIC_PRICE_WEI * count;
+  console.log("TYPE", type);
+  if (type === "1155") {
+    extraData = await contract.methods.mint(TOKEN_ID, count);
   }
-  else if (mintType === "allowlist") {
-    const proof = await getProof(data);
-    extraData = await contract.methods.allowlistSale(count, proof);
-    finalPrice = ALLOWLIST_PRICE_WEI * count;
+  else if (type === "721") {
+    extraData = await contract.methods.forgeToken(TOKEN_ID, count);
   } else {
     throw new Error("Sales is not start yet.");
   }
   var input = extraData.encodeABI();
-  console.log("finalPrice", finalPrice, typeof finalPrice);
   const estimatedGas = await web3.eth.estimateGas({
     from: address,
     data: input,
     to: targetContract,
-    value: web3.utils.toWei(finalPrice.toString(), "wei"),
   });
   const nonce = await web3.eth.getTransactionCount(address, "latest");
   return {
     gas: parseInt(estimatedGas * GAS_INCREASE),
     to: targetContract,
     from: address,
-    value: web3.utils.toWei(finalPrice.toString(), "wei"),
     data: web3.utils.toHex(input),
     nonce,
   };
 };
 
-export const MintTransaction = async (data) => {
+export const MintTransaction = async (data, type) => {
   if (!data.state.web3) {
     return;
   }
@@ -68,7 +60,7 @@ export const MintTransaction = async (data) => {
   }
 
   try {
-    const tx = await formatMintTransaction(data);
+    const tx = await formatMintTransaction(data, type);
     function sendTransaction(_tx) {
       return new Promise((resolve, reject) => {
         data.state.web3.eth
